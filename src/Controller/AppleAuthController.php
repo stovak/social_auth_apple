@@ -130,7 +130,7 @@ class AppleAuthController extends OAuth2ControllerBase {
   }
 
   /**
-   *
+   * ProcessCallback.
    */
   public function processCallback() {
     try {

@@ -1,6 +1,7 @@
 name: Social Auth Sign-in with Apple
 description: Social Auth Sign-in with Apple
 core: 8.x
+core_version_requirement: ^8 || ^9
 type: module
 package: Social
 configure: social_auth_apple.settings_form

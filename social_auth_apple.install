@@ -5,7 +5,6 @@
  * Install and uninstall functions for the Apple Login module.
  */
 
-use Drupal\social_api\Utility\SocialApiImplementerInstaller;
 use Drupal\social_auth\Controller\SocialAuthController;
 
 /**

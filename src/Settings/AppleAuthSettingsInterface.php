@@ -19,6 +19,7 @@ interface AppleAuthSettingsInterface {
    * Gets the team ID.
    *
    * @return string
+   *   getTeamId.
    */
   public function getTeamId();
 
@@ -26,6 +27,7 @@ interface AppleAuthSettingsInterface {
    * Gets the Key File ID.
    *
    * @return string
+   *   getKeyFileId.
    */
   public function getKeyFileId();
 
@@ -33,6 +35,7 @@ interface AppleAuthSettingsInterface {
    * Gets the Key File Path.
    *
    * @return string
+   *   get getKeyFilePath.
    */
   public function getKeyFilePath();
 

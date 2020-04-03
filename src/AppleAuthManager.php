@@ -99,7 +99,7 @@ class AppleAuthManager extends OAuth2Manager {
   }
 
   /**
-   *
+   * GetScopeSeparator.
    */
   protected function getScopeSeparator() {
     return ' ';

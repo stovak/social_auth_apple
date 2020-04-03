@@ -64,7 +64,7 @@ class AppleAuthSettings extends SettingsBase implements AppleAuthSettingsInterfa
   }
 
   /**
-   *
+   * GetKeyFileId.
    */
   public function getKeyFileId() {
     if (!$this->keyFileId) {
@@ -74,7 +74,7 @@ class AppleAuthSettings extends SettingsBase implements AppleAuthSettingsInterfa
   }
 
   /**
-   *
+   * GetKeyFilePath.
    */
   public function getKeyFilePath() {
     if (!$this->keyFilePath) {
