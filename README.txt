@@ -33,7 +33,7 @@ This module requires the following modules:
 APPLE ACCOUNT / CREDENTIALS
 ------------
 
-The harded part of the installation is to setup your credentials within the Apple Developer Account.
+The hardest part of the installation is to setup your credentials within the Apple Developer Account.
 You can follow this guide:
 https://developer.okta.com/blog/2019/06/04/what-the-heck-is-sign-in-with-apple
 
