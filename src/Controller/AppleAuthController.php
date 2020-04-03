@@ -148,12 +148,12 @@ class AppleAuthController extends OAuth2ControllerBase {
 
       $retrievedState = $this->request->getCurrentRequest()->get('state');
 
-      // If (empty($retrievedState) || ($retrievedState !== $state)) {
-      //        $this->userAuthenticator->nullifySessionKeys();
-      //        $this->messenger->addError($this->t('Login failed. Invalid OAuth2 state.'));
-      //
-      //        return NULL;
-      //      }.
+      if (empty($retrievedState) || ($retrievedState !== $state)) {
+        $this->userAuthenticator->nullifySessionKeys();
+        $this->messenger->addError($this->t('Login failed. Invalid OAuth2 state.'));
+
+        return NULL;
+      }
       $this->providerManager->setClient($client)->authenticate();
 
       // Saves access token to session.
