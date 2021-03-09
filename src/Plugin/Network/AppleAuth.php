@@ -56,9 +56,9 @@ class AppleAuth extends NetworkBase {
       ];
 
       // Proxy configuration data for outward proxy.
-      $proxyUrl = $this->siteSettings->get('http_client_config')['proxy']['http'];
-      if ($proxyUrl) {
-        $league_settings['proxy'] = $proxyUrl;
+      $proxy_config = $this->siteSettings->get('http_client_config');
+      if ($proxy_config) {
+        $league_settings['proxy'] = !empty($proxy_config['proxy']['http']) ? $proxy_config['proxy']['http'] : NULL;
       }
 
       return new Apple($league_settings);
