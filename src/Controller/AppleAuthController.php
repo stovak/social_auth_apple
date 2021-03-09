@@ -3,6 +3,7 @@
 namespace Drupal\social_auth_apple\Controller;
 
 use Drupal\Component\Plugin\Exception\PluginException;
+use Drupal\Component\Serialization\Json;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\social_api\Plugin\NetworkManager;
@@ -10,6 +11,7 @@ use Drupal\social_auth\Controller\OAuth2ControllerBase;
 use Drupal\social_auth\SocialAuthDataHandler;
 use Drupal\social_auth\User\UserAuthenticator;
 use Drupal\social_auth_apple\AppleAuthManager;
+use League\OAuth2\Client\Token\AccessToken;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -157,7 +159,12 @@ class AppleAuthController extends OAuth2ControllerBase {
       $this->providerManager->setClient($client)->authenticate();
 
       // Saves access token to session.
-      $this->dataHandler->set('access_token', $this->providerManager->getAccessToken());
+      // Work around https://github.com/patrickbussmann/oauth2-apple/issues/26,
+      // convert the access token into a regular AccessToken object that can
+      // be serialized.
+      $access_token = $this->providerManager->getAccessToken();
+      $json = Json::encode($access_token);
+      $this->dataHandler->set('access_token', new AccessToken(Json::decode($json)));
 
       // Gets user's info from provider.
       if (!$profile = $this->providerManager->getUserInfo()) {
