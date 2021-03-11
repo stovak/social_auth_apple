@@ -95,13 +95,14 @@ class AppleAuthController extends OAuth2ControllerBase {
    */
   public function callback() {
 
-    $request_query = $this->request->getCurrentRequest()->query;
+    $request = $this->request->getCurrentRequest();
 
-    // Checks if authentication failed.
-    if ($request_query->has('error')) {
+    // Checks if authentication failed, the error can either be part of the
+    // query arguments or the POST body.
+    if ($request->get('error')) {
       $this->messenger->addError($this->t('You could not be authenticated.'));
 
-      $response = $this->userAuthenticator->dispatchAuthenticationError($request_query->get('error'));
+      $response = $this->userAuthenticator->dispatchAuthenticationError($request->get('error'));
       if ($response) {
         return $response;
       }
