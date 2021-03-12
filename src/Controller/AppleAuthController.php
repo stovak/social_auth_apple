@@ -11,9 +11,12 @@ use Drupal\social_auth\Controller\OAuth2ControllerBase;
 use Drupal\social_auth\SocialAuthDataHandler;
 use Drupal\social_auth\User\UserAuthenticator;
 use Drupal\social_auth_apple\AppleAuthManager;
+use Firebase\JWT\JWT;
 use League\OAuth2\Client\Token\AccessToken;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+
+JWT::$leeway = 300;
 
 /**
  * Manages requests to Apple API.
