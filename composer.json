@@ -7,6 +7,6 @@
     "minimum-stability": "dev",
     "require": {
         "patrickbussmann/oauth2-apple": "^0.2.1",
-        "drupal/social_auth": "^2.0"
+        "drupal/social_auth": "^2.0|^3.0.0"
     }
 }
