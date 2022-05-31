@@ -4,8 +4,12 @@ namespace Drupal\social_auth_apple\Controller;
 
 use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Component\Serialization\Json;
+use Drupal\Component\Utility\Crypt;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Render\RendererInterface;
+use Drupal\Core\Session\SessionConfigurationInterface;
 use Drupal\social_api\Plugin\NetworkManager;
 use Drupal\social_auth\Controller\OAuth2ControllerBase;
 use Drupal\social_auth\SocialAuthDataHandler;
@@ -14,6 +18,7 @@ use Drupal\social_auth_apple\AppleAuthManager;
 use Firebase\JWT\JWT;
 use League\OAuth2\Client\Token\AccessToken;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 JWT::$leeway = 300;
@@ -22,6 +27,20 @@ JWT::$leeway = 300;
  * Manages requests to Apple API.
  */
 class AppleAuthController extends OAuth2ControllerBase {
+
+  /**
+   * Expirable key/value factory.
+   *
+   * @var \Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface
+   */
+  protected KeyValueExpirableFactoryInterface $keyValueExpirableFactory;
+
+  /**
+   * Session storage options.
+   *
+   * @var array
+   */
+  protected array $sessionStorageOptions;
 
   /**
    * AppleAuthController constructor.
@@ -40,6 +59,8 @@ class AppleAuthController extends OAuth2ControllerBase {
    *   The Social Auth data handler (used for session management).
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   Used to handle metadata for redirection to authentication URL.
+   * @param \Drupal\Core\KeyValueStore\KeyValueExpirableFactoryInterface
+   *   Expirable key/value factory.
    */
   public function __construct(
     MessengerInterface $messenger,
@@ -48,7 +69,9 @@ class AppleAuthController extends OAuth2ControllerBase {
     AppleAuthManager $apple_manager,
     RequestStack $request,
     SocialAuthDataHandler $data_handler,
-    RendererInterface $renderer
+    RendererInterface $renderer,
+    KeyValueExpirableFactoryInterface $key_value_expirable_factory,
+    SessionConfigurationInterface $session_configuration
   ) {
 
     parent::__construct(
@@ -62,6 +85,16 @@ class AppleAuthController extends OAuth2ControllerBase {
       $data_handler,
       $renderer
     );
+    $this->keyValueExpirableFactory = $key_value_expirable_factory;
+    $this->sessionStorageOptions = $session_configuration
+      ->getOptions($request->getCurrentRequest()) + [
+        // This default should land in core at some point.
+        // @see https://www.drupal.org/project/drupal/issues/3150614
+        'cookie_samesite' => NULL,
+        // This default shoudln't be necessary.
+        // @see https://www.drupal.org/project/drupal/issues/289145
+        'cookie_path' => '/',
+      ];
   }
 
   /**
@@ -75,7 +108,9 @@ class AppleAuthController extends OAuth2ControllerBase {
       $container->get('social_auth_apple.manager'),
       $container->get('request_stack'),
       $container->get('social_auth.data_handler'),
-      $container->get('renderer')
+      $container->get('renderer'),
+      $container->get('keyvalue.expirable'),
+      $container->get('session_configuration'),
     );
   }
 
@@ -122,7 +157,7 @@ class AppleAuthController extends OAuth2ControllerBase {
       // Gets (or not) extra initial data.
       $data = $this->userAuthenticator->checkProviderIsAssociated($profile->getId()) ? NULL : $profile->toArray();
 
-      return $this->userAuthenticator->authenticateUser(
+      $redirect = $this->userAuthenticator->authenticateUser(
         $profile->getEmail(),
         $profile->getEmail(),
         $profile->getId(),
@@ -131,8 +166,17 @@ class AppleAuthController extends OAuth2ControllerBase {
         $data
       );
     }
-
-    return $this->redirect('user.login');
+    else {
+      $redirect = $this->redirect('user.login');
+    }
+    if ($this->useCustomSessionForState()) {
+      $redirect->headers->removeCookie(
+        $this->getStateSessionName(),
+        $this->sessionStorageOptions['cookie_path'],
+        $this->sessionStorageOptions['cookie_domain']
+      );
+    }
+    return $redirect;
   }
 
   /**
@@ -150,7 +194,14 @@ class AppleAuthController extends OAuth2ControllerBase {
         return NULL;
       }
 
-      $state = $this->dataHandler->get('oauth2state');
+      if ($this->useCustomSessionForState()) {
+        $key_value = $this->getKeyValueStore();
+        $state = $key_value->get($this->request->getCurrentRequest()->cookies->get($this->getStateSessionName()));
+        $key_value->delete($this->sessionStorageOptions['name']);
+      }
+      else {
+        $state = $this->dataHandler->get('oauth2state');
+      }
 
       $retrievedState = $this->request->getCurrentRequest()->get('state');
 
@@ -184,6 +235,66 @@ class AppleAuthController extends OAuth2ControllerBase {
 
       return NULL;
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function redirectToProvider() {
+    $redirect = parent::redirectToProvider();
+    if ($this->useCustomSessionForState()) {
+      // Due to Apple not correctly implementing OAuth 2 redirects via GET,
+      // storing the state in a session cookie will only work if the session
+      // cookie is SameSite=None, which is not best security practice. To
+      // mitigate this, we will set a purpose-specific, session-like cookie
+      // with SameSite=None, so we may recover the state from storage when
+      // Apple sends the user back to Drupal via HTTP POST.
+      // @see https://www.drupal.org/project/social_auth_apple/issues/3283058
+
+      $session_id = Crypt::randomBytesBase64();
+      $this->getKeyValueStore()
+        ->set($session_id, $this->dataHandler->get('oauth2state'));
+      $this->dataHandler->set('oauth2state', NULL);
+      $redirect->headers->setCookie(new Cookie(
+        $this->getStateSessionName(),
+        $session_id,
+        (new DrupalDateTime())->getTimestamp() + 60*10,
+        $this->sessionStorageOptions['cookie_path'],
+        $this->sessionStorageOptions['cookie_domain'],
+        TRUE,
+        TRUE,
+        FALSE,
+        Cookie::SAMESITE_NONE
+      ));
+    }
+    return $redirect;
+  }
+
+  /**
+   * Get the cookie name for storing a reference to the state.
+   *
+   * @return string
+   */
+  protected function getStateSessionName() {
+    return 'Drupal_Apple_' . $this->sessionStorageOptions['name'];
+  }
+
+  /**
+   * Get the key/value store.
+   *
+   * @return \Drupal\Core\KeyValueStore\KeyValueStoreExpirableInterface
+   */
+  protected function getKeyValueStore() {
+    return $this->keyValueExpirableFactory->get('social_auth_apple_state');
+  }
+
+  /**
+   * Whether we must use a custom session cookie for storing state with Apple.
+   *
+   * @return bool
+   */
+  protected function useCustomSessionForState() {
+    return $this->sessionStorageOptions['cookie_samesite'] !== Cookie::SAMESITE_NONE;
   }
 
 }
