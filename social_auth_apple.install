@@ -21,35 +21,3 @@ function social_auth_apple_requirements($phase) {
 
   return $requirements;
 }
-
-/**
- * Implements hook_install().
- *
- * Method setLoginButtonSettings() sets up the settings for the login button.
- *
- * This button is used for the 'Social Auth Login Block' to add a link to
- * allow users login with the implementing service.
- *
- * The first argument must be the name of the module you are building.
- * The second argument is the route the link will point to.
- * The third one is the path (from the root of the module) to the image which
- * will be used as a link in the 'Social Auth Login Block'.
- */
-function social_auth_apple_install() {
-  SocialAuthController::setLoginButtonSettings('social_auth_apple', 'social_auth_apple.redirect_to_provider', 'img/apple_logo.svg');
-}
-
-/**
- * Implements hook_uninstall().
- *
- * Method deleteLoginButtonSettings() deletes the settings for the login button.
- *
- * When the module is uninstall, you need to remove the login button for the
- * implementer from the 'Social Auth Login Block'.
- *
- * The argument passed to the method must be the name of the module you are
- * building.
- */
-function social_auth_apple_uninstall() {
-  SocialAuthController::deleteLoginButtonSettings('social_auth_apple');
-}

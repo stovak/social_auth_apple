@@ -13,74 +13,60 @@ use Drupal\social_auth\Settings\SettingsBase;
  *
  * @see \Drupal\social_auth_apple\Plugin\Network\AppleAuth
  */
-class AppleAuthSettings extends SettingsBase implements AppleAuthSettingsInterface {
+class AppleAuthSettings extends SettingsBase implements AppleAuthSettingsInterface
+{
+    /**
+     * Team ID.
+     *
+     * @var string
+     */
+    protected $teamId;
 
-  /**
-   * Client ID.
-   *
-   * @var string
-   */
-  protected $clientId;
+    /**
+     * Key File ID.
+     *
+     * @var string
+     */
+    protected $keyFileId;
 
-  /**
-   * Team ID.
-   *
-   * @var string
-   */
-  protected $teamId;
+    /**
+     * Key File Path.
+     *
+     * @var string
+     */
+    protected $keyFilePath;
 
-  /**
-   * Key File ID.
-   *
-   * @var string
-   */
-  protected $keyFileId;
 
-  /**
-   * Key File Path.
-   *
-   * @var string
-   */
-  protected $keyFilePath;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getClientId() {
-    if (!$this->clientId) {
-      $this->clientId = $this->config->get('client_id');
+    /**
+     * {@inheritdoc}
+     */
+    public function getTeamId()
+    {
+        if (!$this->teamId) {
+            $this->teamId = $this->config->get('team_id');
+        }
+        return $this->teamId;
     }
-    return $this->clientId;
-  }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function getTeamId() {
-    if (!$this->teamId) {
-      $this->teamId = $this->config->get('team_id');
+    /**
+     * GetKeyFileId.
+     */
+    public function getKeyFileId()
+    {
+        if (!$this->keyFileId) {
+            $this->keyFileId = $this->config->get('key_file_id');
+        }
+        return $this->keyFileId;
     }
-    return $this->teamId;
-  }
 
-  /**
-   * GetKeyFileId.
-   */
-  public function getKeyFileId() {
-    if (!$this->keyFileId) {
-      $this->keyFileId = $this->config->get('key_file_id');
+    /**
+     * GetKeyFilePath.
+     */
+    public function getKeyFilePath()
+    {
+        if (!$this->keyFilePath) {
+            $this->keyFilePath = $this->config->get('key_file_path');
+        }
+        return $this->keyFilePath;
     }
-    return $this->keyFileId;
-  }
-
-  /**
-   * GetKeyFilePath.
-   */
-  public function getKeyFilePath() {
-    if (!$this->keyFilePath) {
-      $this->keyFilePath = $this->config->get('key_file_path');
-    }
-    return $this->keyFilePath;
-  }
-
 }
