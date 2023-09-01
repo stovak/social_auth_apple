@@ -87,7 +87,7 @@ class AppleAuthSettingsForm extends SocialAuthSettingsForm {
         ->toString(),
     ];
 
-    return $form
+    return $form;
   }
 
   /**
