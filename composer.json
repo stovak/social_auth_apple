@@ -2,6 +2,7 @@
     "name": "drupal/social_auth_apple",
     "type": "drupal-module",
     "description": "Sign in with apple module for Social Auth",
+    "version": "v1.1.0",
     "keywords": ["Drupal"],
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
@@ -22,7 +23,7 @@
             "php-cs-fixer fix ./src --rules=@PSR12"
         ],
         "bumpversion:patch": [
-            "bumpversion --verbose --config-file .bumpversion.cfg patch"
+            "bumpversion --verbose patch"
         ]
     }
 }
