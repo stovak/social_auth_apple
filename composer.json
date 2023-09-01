@@ -21,8 +21,8 @@
         "php-cs-fixer": [
             "php-cs-fixer fix ./src --rules=@PSR12"
         ],
-        "bumpversion:patch": {
+        "bumpversion:patch": [
             "bumpversion --verbose --config-file .bumpversion.cfg patch"
-        }
+        ]
     }
 }
