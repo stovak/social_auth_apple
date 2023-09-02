@@ -124,7 +124,7 @@ class AppleAuthManager extends OAuth2Manager
      *
      * @see \Drupal\social_auth\AuthManager\OAuth2Manager::getExtraDetails
      */
-    public function requestEndPoint(string $method, string $path, ?string $domain = null, array $options = [])
+    public function requestEndPoint(string $method, string $path, ?string $domain = null, array $options = []): mixed
     {
         if (!$domain) {
             $domain = 'https://appleid.apple.com';

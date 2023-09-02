@@ -3,8 +3,10 @@
 namespace Drupal\social_auth_apple\Plugin\Network;
 
 use Drupal\Core\Url;
+use Drupal\social_api\Plugin\NetworkInterface;
 use Drupal\social_api\SocialApiException;
 use Drupal\social_auth\Plugin\Network\NetworkBase;
+use Drupal\social_auth\Settings\SettingsInterface;
 use Drupal\social_auth_apple\Settings\AppleAuthSettings;
 use League\OAuth2\Client\Provider\Apple;
 
@@ -13,8 +15,17 @@ use League\OAuth2\Client\Provider\Apple;
  *
  * @Network(
  *   id = "social_auth_apple",
+ *   short_name = "apple",
  *   social_network = "Apple",
+ *   img_path = "img/apple_logo.svg",
  *   type = "social_auth",
+ *   class_name = "League\OAuth2\Client\Provider\Apple",
+ *   auth_manager = "\Drupal\social_auth_apple\AppleAuthManager",
+ *   routes = {
+ *      "redirect": "social_auth.network.redirect",
+ *      "callback": "social_auth.network.callback",
+ *      "settings_form": "social_auth.network.settings_form",
+ *   },
  *   handlers = {
  *      "settings": {
  *          "class": "\Drupal\social_auth_apple\Settings\AppleAuthSettings",
@@ -23,7 +34,7 @@ use League\OAuth2\Client\Provider\Apple;
  *   }
  * )
  */
-class AppleAuth extends NetworkBase
+class AppleAuth extends NetworkBase implements NetworkInterface
 {
     /**
      * {@inheritdoc}
@@ -36,7 +47,7 @@ class AppleAuth extends NetworkBase
      * @see \Drupal\social_auth_apple\Controller\AppleAuthController::callback
      * @see \Drupal\social_auth\Controller\OAuth2ControllerBase::processCallback
      */
-    public function initSdk()
+    public function initSdk() : mixed
     {
         $class_name = '\League\OAuth2\Client\Provider\Apple';
         if (!class_exists($class_name)) {
@@ -78,7 +89,7 @@ class AppleAuth extends NetworkBase
      *   True if module is configured.
      *   False otherwise.
      */
-    protected function validateConfig(AppleAuthSettings $settings)
+    protected function validateConfig(SettingsInterface $settings): bool
     {
         $client_id = $settings->getClientId();
         $team_id = $settings->getTeamId();

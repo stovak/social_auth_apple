@@ -2,6 +2,7 @@
 
 namespace Drupal\social_auth_apple\Form;
 
+use Drupal\Component\Plugin\Exception\PluginException;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\social_auth\Form\SocialAuthSettingsForm;
@@ -29,8 +30,10 @@ class AppleAuthSettingsForm extends SocialAuthSettingsForm {
 
   /**
    * {@inheritdoc}
+   * @throws PluginException
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?NetworkInterface $network = NULL): array {
+    /** @var \Drupal\social_auth\Plugin\Network\NetworkInterface $network */
     $network = $this->networkManager->createInstance('social_auth_apple');
     $form = parent::buildForm($form, $form_state, $network);
     $config = $this->config('social_auth_apple.settings');
