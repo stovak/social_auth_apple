@@ -29,13 +29,6 @@ class AppleAuthSettings extends SettingsBase implements AppleAuthSettingsInterfa
      */
     protected $keyFileId;
 
-    /**
-     * Key File Path.
-     *
-     * @var string
-     */
-    protected $keyFilePath;
-
 
     /**
      * {@inheritdoc}
@@ -59,14 +52,5 @@ class AppleAuthSettings extends SettingsBase implements AppleAuthSettingsInterfa
         return $this->keyFileId;
     }
 
-    /**
-     * GetKeyFilePath.
-     */
-    public function getKeyFilePath()
-    {
-        if (!$this->keyFilePath) {
-            $this->keyFilePath = $this->config->get('key_file_path');
-        }
-        return $this->keyFilePath;
-    }
+
 }

@@ -38,17 +38,9 @@ class AppleAuthSettingsForm extends SocialAuthSettingsForm {
     $form = parent::buildForm($form, $form_state, $network);
     $config = $this->config('social_auth_apple.settings');
 
-    $form['network']['apple_settings'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Apple Sign-In settings'),
-      '#open' => TRUE,
-      '#description' => $this->t(
-        'You need to first create an Apple App at <a href="@apple-dev">@apple-dev</a>',
-        ['@apple-dev' => 'https://developer.apple.com/']
-      ),
-    ];
+    $form['network']['#open'] = TRUE;
 
-    $form['network']['apple_settings']['client_id'] = [
+    $form['network']['client_id'] = [
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => $this->t('Client ID'),
@@ -56,7 +48,7 @@ class AppleAuthSettingsForm extends SocialAuthSettingsForm {
       '#description' => $this->t('Copy the Client ID here, it is the Service ID'),
     ];
 
-    $form['network']['apple_settings']['team_id'] = [
+    $form['network']['team_id'] = [
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => $this->t('Team ID'),
@@ -64,7 +56,7 @@ class AppleAuthSettingsForm extends SocialAuthSettingsForm {
       '#description' => $this->t('Copy the Team Id here (10 characters top right under the login)'),
     ];
 
-    $form['network']['apple_settings']['key_file_id'] = [
+    $form['network']['key_file_id'] = [
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => $this->t('Key File Id'),
@@ -72,15 +64,13 @@ class AppleAuthSettingsForm extends SocialAuthSettingsForm {
       '#description' => $this->t('Copy key file id here (prefix of the key file'),
     ];
 
-    $form['network']['apple_settings']['key_file_path'] = [
-      '#type' => 'textfield',
-      '#required' => TRUE,
-      '#title' => $this->t('Key File Path'),
-      '#default_value' => $config->get('key_file_path'),
+    $form['network']['key'] = [
+      '#type' => 'key_select',
+      '#title' => $this->t('Secret key'),
       '#description' => $this->t('Path to the key file relative to the website root. (f.ex. oauth/HGNHTBYZB7.p8)'),
     ];
 
-    $form['network']['apple_settings']['authorized_redirect_url'] = [
+    $form['network']['authorized_redirect_url'] = [
       '#type' => 'textfield',
       '#disabled' => TRUE,
       '#title' => $this->t('Authorized redirect URIs'),

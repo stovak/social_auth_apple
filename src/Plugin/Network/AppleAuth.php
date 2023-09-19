@@ -63,7 +63,7 @@ class AppleAuth extends NetworkBase implements NetworkInterface
               'clientId' => $settings->getClientId(),
               'teamId' => $settings->getTeamId(),
               'keyFileId' => $settings->getKeyFileId(),
-              'keyFilePath' => DRUPAL_ROOT . '/../' . $settings->getKeyFilePath(),
+              'key' => $settings->getKeyFilePath(),
               'redirectUri' => Url::fromRoute('social_auth_apple.callback')->setAbsolute()->toString(),
             ];
 
